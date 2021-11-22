@@ -1,4 +1,5 @@
 import UIKit
+import SPConfetti
 
 class CheckoutController: UIViewController {
 
@@ -22,20 +23,13 @@ class CheckoutController: UIViewController {
         navigationItem.largeTitleDisplayMode = .always
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        Loader.shared.show()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            Loader.shared.hide()
-        }
-    }
-
     // MARK: - Actions
 
     @objc
     private func handleButtonPress() {
         dismiss(animated: true, completion: nil)
         CartService.shared.removeAll()
+        SPConfetti.startAnimating(.fullWidthToDown, particles: [.triangle, .arc, .heart, .star, .circle], duration: 3)
     }
 
 }

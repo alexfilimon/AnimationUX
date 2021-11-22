@@ -20,8 +20,8 @@ class SplashController: SPController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            self.onEndAnimation?()
+        mainView.startAnimation { [weak self] in
+            self?.onEndAnimation?()
         }
     }
 

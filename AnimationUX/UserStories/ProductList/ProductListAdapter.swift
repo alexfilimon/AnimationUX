@@ -1,5 +1,4 @@
 import UIKit
-import SPAlert
 
 class ProductListAdapter: NSObject, UICollectionViewDataSource, UICollectionViewDelegate {
 
@@ -10,7 +9,7 @@ class ProductListAdapter: NSObject, UICollectionViewDataSource, UICollectionView
 
     // MARK: - Properties
 
-    var onProductToCart: ((ProductModel) -> Void)?
+    var onProductToCart: ((UIImage?, UIView, ProductModel) -> Void)?
 
     // MARK: - Initialization
 
@@ -51,11 +50,6 @@ class ProductListAdapter: NSObject, UICollectionViewDataSource, UICollectionView
             productImageURL: URL(string: item.imageURLString)!,
             isFav: item.isFav,
             onFavPress: { [weak self] isFav in
-                let window = (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.window
-                window?.isUserInteractionEnabled = false
-                SPAlert.present(title: "Добавлено", message: "Товар добавлен в избранное", preset: .heart, completion: { [weak window] in
-                    window?.isUserInteractionEnabled = true
-                })
                 self?.items[indexPath.row] = .init(
                     id: item.id,
                     title: item.title,
@@ -64,8 +58,10 @@ class ProductListAdapter: NSObject, UICollectionViewDataSource, UICollectionView
                     isFav: isFav
                 )
             },
-            onButtonPress: { [weak self] in
-                self?.onProductToCart?(item)
+            onButtonPress: { [weak self, weak cell] in
+                guard let cell = cell else { return }
+                let screenshot = cell.screenshot
+                self?.onProductToCart?(screenshot, cell, item)
             }
         )
         return cell

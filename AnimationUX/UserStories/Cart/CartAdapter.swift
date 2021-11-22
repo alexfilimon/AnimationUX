@@ -1,11 +1,15 @@
 import UIKit
 
-class CartAdapter: NSObject, UITableViewDelegate, UITableViewDataSource {
+enum Section {
+    case main
+}
+
+class CartAdapter: NSObject, UITableViewDelegate {
 
     // MARK: - Private Properties
 
     private weak var tableView: UITableView?
-    private var items: [CartItemModel] = []
+    private let dataSource: UITableViewDiffableDataSource<Section, CartItemModel>
 
     // MARK: - Properties
 
@@ -15,30 +19,24 @@ class CartAdapter: NSObject, UITableViewDelegate, UITableViewDataSource {
 
     init(tableView: UITableView) {
         self.tableView = tableView
+        self.dataSource = .init(tableView: tableView, cellProvider: { tableView, indexPath, item in
+            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! CartItemTableCell
+            cell.configure(item: item)
+            return cell
+        })
         super.init()
         tableView.delegate = self
-        tableView.dataSource = self
         tableView.register(CartItemTableCell.self, forCellReuseIdentifier: "cell")
     }
 
     // MARK: - Methods
 
     func configure(items: [CartItemModel]) {
-        self.items = items
-        tableView?.reloadData()
-    }
+        var snapshot = NSDiffableDataSourceSnapshot<Section, CartItemModel>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(items, toSection: .main)
 
-    // MARK: - UITableViewDataSource
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items.count
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let item = items[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! CartItemTableCell
-        cell.configure(item: item)
-        return cell
+        dataSource.apply(snapshot)
     }
 
     // MARK: - UITableViewDelegate
@@ -48,7 +46,7 @@ class CartAdapter: NSObject, UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let item = items[indexPath.row]
+        let item = dataSource.itemIdentifier(for: indexPath)!
         let removeAction = UIContextualAction(style: .destructive, title: "Удалить", handler: { [weak self] _, _, completion in
             self?.onItemDelete?(item, completion)
         })

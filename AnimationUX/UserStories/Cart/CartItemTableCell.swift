@@ -23,6 +23,15 @@ class CartItemTableCell: UITableViewCell {
         commonInit()
     }
 
+    // MARK: - UITableViewCell
+
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        super.setHighlighted(highlighted, animated: animated)
+        UIView.animate(withDuration: 0.3) {
+            self.transform = highlighted ? .init(scale: 0.97) : .identity
+        }
+    }
+
     // MARK: - Methods
 
     func configure(item: CartItemModel) {

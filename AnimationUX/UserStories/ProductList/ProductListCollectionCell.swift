@@ -29,6 +29,16 @@ class ProductListCollectionCell: UICollectionViewCell {
         commonInit()
     }
 
+    // MARK: - UICollectionView
+
+    override var isHighlighted: Bool {
+        didSet {
+            UIView.animate(withDuration: 0.3) {
+                self.transform = self.isHighlighted ? .init(scale: 0.97) : .identity
+            }
+        }
+    }
+
     // MARK: - Methods
 
     func configure(
@@ -106,8 +116,44 @@ class ProductListCollectionCell: UICollectionViewCell {
     // MARK: - Private Methods
 
     private func setFav(_ isFav: Bool, animated: Bool) {
-        favButton.setImage(UIImage(systemName: isFav ? "heart.fill" : "heart"))
-        favButton.tintColor = isFav ? .systemRed : .systemGreen
+        self.isFav = isFav
+        let animationImageBlock: () -> Void = {
+            self.favButton.setImage(UIImage(systemName: isFav ? "heart.fill" : "heart"))
+            self.favButton.tintColor = isFav ? .systemRed : .systemGreen
+        }
+        let animationTransformBlock1: () -> Void = {
+            self.favButton.transform = .init(scale: 1.2)
+        }
+        let animationTransformBlock2: () -> Void = {
+            self.favButton.transform = .identity
+        }
+        if animated {
+            UIView.transition(
+                with: favButton,
+                duration: 0.1,
+                options: .transitionCrossDissolve,
+                animations: animationImageBlock
+            ) { _ in
+                UIView.animate(
+                    withDuration: 0.2,
+                    delay: 0,
+                    options: [.curveEaseInOut],
+                    animations: animationTransformBlock1,
+                    completion: { _ in
+                        UIView.animate(
+                            withDuration: 0.2,
+                            delay: 0,
+                            options: [.curveEaseInOut],
+                            animations: animationTransformBlock2,
+                            completion: nil
+                        )
+                    }
+                )
+            }
+        } else {
+            animationImageBlock()
+            animationTransformBlock2()
+        }
     }
 
     // MARK: - Actions

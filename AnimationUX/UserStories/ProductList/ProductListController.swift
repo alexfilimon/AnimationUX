@@ -10,7 +10,7 @@ class ProductListController: UIViewController {
 
     // MARK: - Properties
 
-    var onAddProduct: ((ProductModel) -> Void)?
+    var onAddProduct: ((UIImageView, ProductModel) -> Void)?
 
     // MARK: - UIViewController
 
@@ -22,7 +22,12 @@ class ProductListController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        adapter.onProductToCart = onAddProduct
+        adapter.onProductToCart = { [weak self] image, view, product in
+            let realFrame = self?.mainView.collectionView.convert(view.frame, to: self?.view)
+            let imageView = UIImageView(image: image)
+            imageView.frame = realFrame ?? .zero
+            self?.onAddProduct?(imageView, product)
+        }
         let items = ProductsDataProvider.getItems()
         adapter.configure(items: items)
     }
